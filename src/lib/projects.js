@@ -21,6 +21,10 @@ const API = 'https://api.github.com';
 
 // Placeholder colours for projects that don't have a thumbnail yet.
 // Picked from the project name, so each project keeps the same colour between builds.
+// Which files in a teriyaki/ or showcase folder count as screenshots and videos.
+const IMAGE = /\.(png|jpe?g|webp|gif|avif)$/i;
+const VIDEO = /\.(mp4|webm|mov)$/i;
+
 const TINTS = ['#3B4A6B', '#2E5E4E', '#6A3FA0', '#A88A4A', '#5B2A4E', '#2F7D6D', '#C24A3A', '#4A5D23', '#B8577A', '#1F2933'];
 
 function headers(accept = 'application/vnd.github+json') {
@@ -95,6 +99,12 @@ async function fromRepo(repo) {
   const asset = (path) => (!path ? null : /^https?:\/\//.test(path) ? path : raw(`teriyaki/${path.replace(/^\.?\//, '')}`));
 
   const info = (await fetchOptional(raw('teriyaki/project.json'))) ?? {};
+  // Same rule as showcase folders: thumb.* is the card image, and with no "media" list in
+  // project.json every other image/video in teriyaki/ is used, in filename order.
+  const listing = (await fetchOptional(`${API}/repos/${GITHUB_USER}/${repo.name}/contents/teriyaki`)) ?? [];
+  const files = (Array.isArray(listing) ? listing : []).filter((f) => f.type === 'file').map((f) => f.name).sort();
+  const thumbFile = info.thumbnail ?? files.find((f) => /^thumb(nail)?\./i.test(f) && IMAGE.test(f));
+  const media = info.media ?? files.filter((f) => (IMAGE.test(f) || VIDEO.test(f)) && f !== thumbFile).map((f) => ({ src: f }));
   // If you don't say, a repo with GitHub Pages turned on counts as playable.
   const type = info.type ?? (repo.has_pages ? 'play' : 'watch');
   // GitHub renders the README to HTML for us (same look as on github.com, minus styling).
@@ -119,9 +129,9 @@ async function fromRepo(repo) {
     created: info.created ?? repo.created_at,
     updated: repo.pushed_at,
     playUrl: info.playUrl ?? null,
-    thumbnail: asset(info.thumbnail),
+    thumbnail: asset(thumbFile ?? media.find((m) => IMAGE.test(m.src))?.src),
     color: info.color,
-    media: (info.media ?? []).map((m) => ({ ...m, src: asset(m.src) })),
+    media: media.map((m) => ({ ...m, src: asset(m.src) })),
     repoUrl: repo.html_url,
     readmeHtml,
     isSample: false,
@@ -131,8 +141,6 @@ async function fromRepo(repo) {
 // ---------- Showcase projects (hosted by this site, no code on GitHub) ----------
 
 const SHOWCASE_DIR = path.resolve('public/showcase');
-const IMAGE = /\.(png|jpe?g|webp|gif|avif)$/i;
-const VIDEO = /\.(mp4|webm|mov)$/i;
 
 // When this folder last changed in git, i.e. when you last committed new screenshots or notes.
 // Returns null for a folder that hasn't been committed yet.
