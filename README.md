@@ -14,7 +14,7 @@ Until at least one repo is tagged `teriyaki`, the site shows sample data from `s
 ## Adding a project to the site
 
 1. **Put the project on GitHub** as a public repo. The repo name becomes its address:
-   `rune-dice` → `teriyakiprojects.io/rune-dice/`. Lowercase-with-dashes reads best.
+   `rune-dice` → `teriyakisaurusrex2.github.io/rune-dice/`. Lowercase-with-dashes reads best.
 2. **Tag it**: on the repo's page, click the ⚙ next to "About" and add the topic `teriyaki`.
    No tag = not on the site.
 3. **Optional, recommended**: add a `teriyaki/` folder to the repo with a `project.json`
