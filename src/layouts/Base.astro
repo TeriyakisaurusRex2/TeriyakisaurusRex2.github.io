@@ -1,0 +1,65 @@
+---
+// The shell every page sits in: <head>, fonts, the misty colour blobs, and the
+// script that keeps "3 days ago" labels correct between builds.
+import '../styles/mist.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  // Blob positions differ per page so the mist sits behind the content.
+  blobs?: { w: number; h: number; x: string; y: number; color: string }[];
+}
+
+const {
+  title,
+  description = '',
+  blobs = [
+    { w: 620, h: 520, x: '-160px', y: 80, color: '#C9D6C3' },
+    { w: 520, h: 460, x: 'calc(100% - 400px)', y: 420, color: '#E9D1C9' },
+    { w: 700, h: 560, x: '30%', y: 1300, color: '#C8D3DF' },
+    { w: 560, h: 520, x: '-140px', y: 2300, color: '#E6DCC4' },
+    { w: 600, h: 520, x: 'calc(100% - 440px)', y: 3000, color: '#C9D6C3' },
+  ],
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=JetBrains+Mono:wght@400&display=swap"
+    />
+  </head>
+  <body>
+    <div class="page">
+      {blobs.map((b) => (
+        <div
+          class="blob"
+          aria-hidden="true"
+          style={`width:${b.w}px;height:${b.h}px;left:${b.x};top:${b.y}px;background:${b.color}`}
+        />
+      ))}
+      <div class="wrap">
+        <slot />
+      </div>
+    </div>
+
+    <script>
+      // The build writes dates as they were at build time. This refreshes every
+      // element marked data-rel="<ISO date>" to be relative to *now*.
+      import { relative } from '../lib/dates.js';
+      for (const el of document.querySelectorAll('[data-rel]')) {
+        el.textContent = relative(el.dataset.rel);
+      }
+    </script>
+  </body>
+</html>

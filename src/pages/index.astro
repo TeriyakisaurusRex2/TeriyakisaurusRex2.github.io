@@ -1,0 +1,159 @@
+---
+// The homepage: hero, "recently touched", then every project with filters and sorting.
+import Base from '../layouts/Base.astro';
+import Thumb from '../components/Thumb.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getProjects, GITHUB_USER } from '../lib/projects.js';
+import { relative } from '../lib/dates.js';
+
+const projects = await getProjects();
+const byUpdated = [...projects].sort((a, b) => b.updated.localeCompare(a.updated));
+const latest = byUpdated[0];
+const recent = byUpdated.slice(1, 4);
+const playCount = projects.filter((p) => p.type === 'play').length;
+const watchCount = projects.length - playCount;
+const usingSample = projects.some((p) => p.isSample);
+
+// Each filter is a test the script runs against a card's data-* attributes.
+const filters = [
+  { id: 'all', label: 'All', test: () => true },
+  { id: 'play', label: 'Playable', test: (p) => p.type === 'play' },
+  { id: 'watch', label: 'Watch', test: (p) => p.type === 'watch' },
+  { id: 'game', label: 'Games', test: (p) => p.category === 'game' },
+  { id: 'tool', label: 'Tools', test: (p) => p.category === 'tool' },
+  { id: 'unity', label: 'Unity', test: (p) => p.engine?.toLowerCase() === 'unity' },
+].map((f) => ({ ...f, count: projects.filter(f.test).length }))
+  // Hide filters that would show nothing.
+  .filter((f) => f.count > 0);
+
+const sorts = [
+  { id: 'updated', label: 'Last updated' },
+  { id: 'created', label: 'Newest' },
+  { id: 'name', label: 'A–Z' },
+];
+---
+<Base title="Teriyaki Projects" description="Games, tools and experiments.">
+  <header class="site-header">
+    <a class="wordmark" href="/">teriyaki projects</a>
+    <a class="gh-link" href={`https://github.com/${GITHUB_USER}`}>
+      github
+      <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4 3h5v5" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
+    </a>
+  </header>
+
+  <section class="hero">
+    <div class="vline" aria-hidden="true"></div>
+    <h1>Teriyaki Projects</h1>
+    <p class="intro">[One-line intro: games, tools and odd hardware, built after hours by one person.]</p>
+    <p class="counts">{projects.length} projects · {playCount} playable · {watchCount} to watch</p>
+    {latest && (
+      <a class="glass pill" href={latest.url}>
+        <span class="dot" aria-hidden="true"></span>
+        <span>Latest: <strong style="font-weight:500">{latest.name}</strong>, updated <span data-rel={latest.updated}>{relative(latest.updated)}</span></span>
+      </a>
+    )}
+    {usingSample && <p class="sample-note">Showing sample data: no GitHub repos are tagged “teriyaki” yet.</p>}
+  </section>
+
+  {recent.length > 0 && (
+    <section class="recent-section" aria-labelledby="recent-h">
+      <div class="label-row"><h2 id="recent-h" class="label">recently touched</h2></div>
+      <ol class="recent">
+        {recent.map((p) => (
+          <li>
+            <a class="card glass" href={p.url}>
+              <Thumb project={p} showTag={false} />
+              <span class="recent-text">
+                <span class="recent-when" data-rel={p.updated}>{relative(p.updated)}</span>
+                <span class="recent-name">{p.name}</span>
+                <span class="recent-meta">{p.type === 'play' ? 'playable' : 'watch'}{p.language && ` · ${p.language}`}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <section aria-labelledby="all-h">
+    <div class="all-head">
+      <div class="label-row"><h2 id="all-h" class="label">all projects</h2></div>
+      <div class="glass toolbar">
+        <div class="toolbar-group" role="group" aria-label="Filter projects">
+          {filters.map((f, i) => (
+            <button type="button" class="opt" data-filter={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {f.label}<span class="opt-n">{f.count}</span>
+            </button>
+          ))}
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group" role="group" aria-label="Sort projects">
+          {sorts.map((s, i) => (
+            <button type="button" class="opt" data-sort={s.id} aria-pressed={i === 0 ? 'true' : 'false'}>{s.label}</button>
+          ))}
+        </div>
+      </div>
+      <p class="summary" aria-live="polite" id="summary">{projects.length} shown · sorted by last updated</p>
+    </div>
+
+    <p class="empty" id="empty" hidden>Nothing here yet.</p>
+    <ul class="grid" id="grid">
+      {byUpdated.map((p) => <ProjectCard project={p} />)}
+    </ul>
+  </section>
+
+  <footer class="site-footer">
+    <div class="vline" aria-hidden="true"></div>
+    <span>synced from github.com/{GITHUB_USER}</span>
+  </footer>
+</Base>
+
+<script>
+  // Filtering and sorting happen in the browser: every card is already on the page,
+  // this just hides some and changes their order.
+  const grid = document.getElementById('grid');
+  const summary = document.getElementById('summary');
+  const empty = document.getElementById('empty');
+  const cards = [...grid.children];
+  let filter = 'all';
+  let sort = 'updated';
+
+  const tests = {
+    all: () => true,
+    play: (d) => d.type === 'play',
+    watch: (d) => d.type === 'watch',
+    game: (d) => d.category === 'game',
+    tool: (d) => d.category === 'tool',
+    unity: (d) => d.engine === 'unity',
+  };
+  const sorters = {
+    updated: (a, b) => b.dataset.updated.localeCompare(a.dataset.updated),
+    created: (a, b) => b.dataset.created.localeCompare(a.dataset.created),
+    name: (a, b) => a.dataset.name.localeCompare(b.dataset.name),
+  };
+  const sortLabels = { updated: 'last updated', created: 'newest', name: 'name' };
+
+  function render() {
+    let shown = 0;
+    for (const card of [...cards].sort(sorters[sort])) {
+      card.hidden = !tests[filter](card.dataset);
+      if (!card.hidden) shown++;
+      grid.appendChild(card); // re-appending moves it to the end, which reorders the grid
+    }
+    empty.hidden = shown > 0;
+    summary.textContent = `${shown} shown · sorted by ${sortLabels[sort]}`;
+  }
+
+  function wire(attr, set) {
+    const buttons = document.querySelectorAll(`[data-${attr}]`);
+    for (const btn of buttons) {
+      btn.addEventListener('click', () => {
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b === btn));
+        set(btn.dataset[attr]);
+        render();
+      });
+    }
+  }
+  wire('filter', (v) => (filter = v));
+  wire('sort', (v) => (sort = v));
+</script>

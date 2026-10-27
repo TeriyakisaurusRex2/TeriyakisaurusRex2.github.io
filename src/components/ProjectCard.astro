@@ -1,0 +1,48 @@
+---
+// One card in the "all projects" grid. The data-* attributes are what the
+// filter/sort script on the homepage reads.
+import Thumb from './Thumb.astro';
+import { relative, absolute, daysSince } from '../lib/dates.js';
+
+const { project: p } = Astro.props;
+const isPlay = p.type === 'play';
+---
+<li
+  data-type={p.type}
+  data-category={p.category}
+  data-engine={p.engine?.toLowerCase()}
+  data-name={p.name.toLowerCase()}
+  data-created={p.created}
+  data-updated={p.updated}
+>
+  <a class="card glass" href={p.url}>
+    <Thumb project={p}>
+      {isPlay ? (
+        <span class="type type-play">
+          <svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
+          Play in browser
+        </span>
+      ) : (
+        <span class="type type-watch">
+          <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.2" /><circle cx="6" cy="6" r="1.6" fill="currentColor" /></svg>
+          Watch
+        </span>
+      )}
+    </Thumb>
+    <div class="card-body">
+      <span class="card-title">
+        <span class="card-name">{p.name}</span>
+        {p.language && <span class="card-lang">{p.language}</span>}
+      </span>
+      {p.description && <span class="card-desc">{p.description}</span>}
+      {p.tags.length > 0 && <span class="card-tags">{p.tags.slice(0, 3).join('  ·  ')}</span>}
+      <span class="card-dates">
+        <span class="fresh">
+          {daysSince(p.updated) <= 7 && <span class="fresh-dot" aria-hidden="true" />}
+          <span>updated <strong data-rel={p.updated}>{relative(p.updated)}</strong></span>
+        </span>
+        <span>created {absolute(p.created)}</span>
+      </span>
+    </div>
+  </a>
+</li>

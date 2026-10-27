@@ -1,0 +1,18 @@
+---
+// A project's thumbnail: the real screenshot if project.json names one,
+// otherwise a coloured tile with the project's initials.
+const { project, showTag = true } = Astro.props;
+---
+<div class="frame">
+  {project.thumbnail ? (
+    <div class="thumb">
+      <img src={project.thumbnail} alt="" loading="lazy" decoding="async" />
+    </div>
+  ) : (
+    <div class="thumb thumb-empty" style={`background-color:${project.tint}`}>
+      <span class="initials" aria-hidden="true">{project.initials}</span>
+    </div>
+  )}
+  <slot />
+  {showTag && !project.thumbnail && <span class="ph-tag">no screenshot yet</span>}
+</div>
