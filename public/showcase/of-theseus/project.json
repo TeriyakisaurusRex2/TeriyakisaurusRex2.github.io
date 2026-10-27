@@ -1,0 +1,11 @@
+{
+  "name": "Of Theseus",
+  "description": "A top-down space-flight game about relativity.",
+  "about": "Fly a Newtonian ship, then keep upgrading it until near-light speed makes space and time behave strangely. Built in Unity as a way to make relativity something you can feel.",
+  "category": "game",
+  "engine": "Unity",
+  "language": "C#",
+  "status": "In development",
+  "created": "2026-09-30",
+  "tags": ["Unity", "physics", "space"]
+}

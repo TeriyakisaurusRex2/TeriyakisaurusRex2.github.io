@@ -61,6 +61,22 @@ Until at least one repo is tagged `teriyaki`, the site shows sample data from `s
 
 **Keep videos small** (under ~25 MB) or use an unlisted YouTube link. GitHub rejects files over 100 MB.
 
+## Showcase projects (code stays off GitHub)
+
+For projects you want on the site without publishing their code (the Unity games),
+make a folder in **this** repo: `public/showcase/<slug>/`. The folder name becomes the
+address (`public/showcase/of-theseus/` → `/of-theseus/`). Put in it:
+
+- `project.json`: same fields as above (`type` defaults to `watch`). Add `"repoUrl"` only if
+  you ever want a "View source" button.
+- `README.md` (optional): becomes the "about" section on the project page.
+- Screenshots and videos: just drop them in. Without a `media` list they're shown in
+  filename order, so name them `01-trailer.mp4`, `02-hub.png`, `03-boss.png`...
+  A file named `thumb.png` (or `.jpg`/`.webp`) becomes the card image; otherwise the first screenshot is used.
+
+"Last updated" for these is the last time you committed a change to that folder,
+or set `"updated": "YYYY-MM-DD"` in `project.json` to choose it yourself.
+
 ## Making a playable project work at /repo-name/
 
 In that project's repo: Settings → Pages → Source: "Deploy from a branch", pick `main` and `/ (root)`.

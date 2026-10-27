@@ -1,0 +1,11 @@
+{
+  "name": "Co-op Dungeon Puzzler",
+  "description": "First-person co-op felt-puppet dungeon puzzler with a built-in level editor.",
+  "about": "Team up as felt puppets to solve dungeon puzzles together. Includes an in-game, Portal 2-style level creator for building your own rooms.",
+  "category": "game",
+  "engine": "Unity",
+  "language": "C#",
+  "status": "In development",
+  "created": "2026-10-14",
+  "tags": ["Unity", "co-op", "level editor"]
+}

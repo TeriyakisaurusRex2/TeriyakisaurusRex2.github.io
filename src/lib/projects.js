@@ -4,9 +4,15 @@
 // 2. Keep only the ones tagged with the "teriyaki" topic (that's how you opt a repo in).
 // 3. For each, read the optional teriyaki/project.json in the repo for extra details
 //    (screenshots, video, status, created date...), and for Watch projects the README.
-// 4. If nothing is tagged yet, or GitHub can't be reached, fall back to sample data
-//    so the site still renders while you're working on it.
+// 4. Add "showcase" projects: ones whose code stays off GitHub (e.g. Unity games), described
+//    by a folder in this site's own public/showcase/<slug>/ (project.json, README.md, screenshots).
+// 5. If there's nothing from either source, or GitHub can't be reached, fall back to sample
+//    data so the site still renders while you're working on it.
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { marked } from 'marked';
 import sample from '../data/sample-projects.json';
 
 export const GITHUB_USER = 'TeriyakisaurusRex2';
@@ -122,17 +128,91 @@ async function fromRepo(repo) {
   });
 }
 
-async function load() {
+// ---------- Showcase projects (hosted by this site, no code on GitHub) ----------
+
+const SHOWCASE_DIR = path.resolve('public/showcase');
+const IMAGE = /\.(png|jpe?g|webp|gif|avif)$/i;
+const VIDEO = /\.(mp4|webm|mov)$/i;
+
+// When this folder last changed in git, i.e. when you last committed new screenshots or notes.
+// Returns null for a folder that hasn't been committed yet.
+function lastCommitDate(dir) {
+  try {
+    return execFileSync('git', ['log', '-1', '--format=%cI', '--', dir], { encoding: 'utf8' }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function fromShowcase() {
+  if (!fs.existsSync(SHOWCASE_DIR)) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  return fs
+    .readdirSync(SHOWCASE_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map(({ name: slug }) => {
+      const dir = path.join(SHOWCASE_DIR, slug);
+      const read = (file) => {
+        const full = path.join(dir, file);
+        return fs.existsSync(full) ? fs.readFileSync(full, 'utf8') : null;
+      };
+      const info = JSON.parse(read('project.json') ?? '{}');
+      // Files in the folder are served at /showcase/<slug>/<file>; full URLs (YouTube) pass through.
+      const url = (file) => (/^https?:\/\//.test(file) ? file : `/showcase/${slug}/${file}`);
+
+      const files = fs.readdirSync(dir).sort();
+      const thumbFile = info.thumbnail ?? files.find((f) => /^thumb(nail)?\./i.test(f) && IMAGE.test(f));
+      // No "media" list in project.json = every image and video in the folder, in filename order.
+      // So you can just drop in 01-trailer.mp4, 02-hub.png, 03-boss.png and it works.
+      const media =
+        info.media ?? files.filter((f) => (IMAGE.test(f) || VIDEO.test(f)) && f !== thumbFile).map((f) => ({ src: f }));
+      const thumbnail = thumbFile ?? media.find((m) => IMAGE.test(m.src))?.src;
+      const readme = read('README.md');
+
+      const created = info.created ?? today;
+      return normalize({
+        slug,
+        name: info.name ?? prettify(slug),
+        description: info.description ?? '',
+        about: info.about ?? null,
+        tags: info.tags ?? [],
+        language: info.language ?? '',
+        type: info.type ?? 'watch',
+        category: info.category ?? 'game',
+        engine: info.engine ?? '',
+        status: info.status ?? '',
+        created,
+        updated: info.updated ?? lastCommitDate(dir) ?? created,
+        playUrl: info.playUrl ?? null,
+        thumbnail: thumbnail ? url(thumbnail) : null,
+        color: info.color,
+        media: media.map((m) => ({ ...m, src: url(m.src) })),
+        // Only shown if you give one: the code isn't public, so there's no source button by default.
+        repoUrl: info.repoUrl ?? null,
+        readmeHtml: readme ? marked.parse(readme) : null,
+        isSample: false,
+      });
+    });
+}
+
+async function fromGitHub() {
   try {
     const res = await fetch(`${API}/users/${GITHUB_USER}/repos?per_page=100`, { headers: headers() });
     if (!res.ok) throw new Error(`GitHub answered ${res.status}`);
     const repos = await res.json();
     const tagged = repos.filter((r) => !r.fork && (r.topics ?? []).includes(TOPIC));
-    if (tagged.length > 0) return await Promise.all(tagged.map(fromRepo));
-    console.warn(`[teriyaki] No repos tagged "${TOPIC}" yet, showing sample data.`);
+    if (tagged.length === 0) console.warn(`[teriyaki] No repos tagged "${TOPIC}" yet.`);
+    return await Promise.all(tagged.map(fromRepo));
   } catch (err) {
-    console.warn(`[teriyaki] Couldn't reach GitHub (${err.message}), showing sample data.`);
+    console.warn(`[teriyaki] Couldn't reach GitHub (${err.message}).`);
+    return [];
   }
+}
+
+async function load() {
+  const projects = [...(await fromGitHub()), ...fromShowcase()];
+  if (projects.length > 0) return projects;
+  console.warn('[teriyaki] Nothing to show yet, using sample data.');
   return sample.map((p) =>
     normalize({ ...p, repoUrl: `https://github.com/${GITHUB_USER}/${p.slug}`, readmeHtml: null, isSample: true })
   );
