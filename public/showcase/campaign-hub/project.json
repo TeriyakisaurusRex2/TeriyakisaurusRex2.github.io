@@ -1,0 +1,10 @@
+{
+  "name": "Saltmere Campaign Hub",
+  "description": "A player's hub for a D&D campaign: party, character sheet, quests, maps, shops and a combat grid.",
+  "type": "play",
+  "category": "tool",
+  "language": "HTML",
+  "created": "2026-11-01",
+  "playUrl": "/showcase/campaign-hub/hub.html",
+  "tags": ["D&D", "campaign", "maps"]
+}

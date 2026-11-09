@@ -1,0 +1,10 @@
+{
+  "name": "MTG Game Assistant",
+  "description": "A Magic: The Gathering life tracker where one tablet runs the table and phones join as controllers.",
+  "about": "One device sits in the middle of the table as the shared display for life, commander damage and turns. Each player can join from their phone by QR code to control their own seat. Seats are laid out to match how people actually sit around a table.",
+  "category": "tool",
+  "language": "TypeScript",
+  "status": "In development",
+  "created": "2026-05-30",
+  "tags": ["Magic", "React", "real-time"]
+}

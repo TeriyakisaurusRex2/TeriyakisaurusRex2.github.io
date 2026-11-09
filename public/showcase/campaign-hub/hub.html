@@ -1,0 +1,712 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Saltmere Campaign Hub</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: top nav; 70/30 split, visual stage left and detail rail right; stacks on phones */
+:root{
+  --bg:#10141a; --panel:#171d25; --raise:#1f2731; --line:#2c3643; --fg:#e7e2d7; --muted:#95a0aa;
+  --brass:#cfa955; --verd:#5fa59a; --good:#74c27a; --warn:#e3b04b; --crit:#e0605a;
+  --sea:#15303a; --sea2:#1b3c48; --land:#38483a; --land2:#465843; --ink:#0b0f14;
+  --display:"Pirata One", Georgia, serif;
+  --body:"Alegreya Sans", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 14px}
+
+/* nav */
+.nav{display:flex;align-items:center;gap:20px;border-bottom:1px solid var(--line);padding-block:10px;min-width:0}
+.brand{display:flex;flex-direction:column;line-height:1.05;flex:none}
+.brand-mark{font-family:var(--display);font-size:28px;color:var(--brass);letter-spacing:.02em}
+.brand-sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.tabs{display:flex;gap:2px;overflow-x:auto;min-width:0;flex:1;scrollbar-width:none}
+.tabs a{color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:6px;white-space:nowrap;font-weight:500;border-bottom:2px solid transparent;border-radius:6px 6px 0 0}
+.tabs a:hover{color:var(--fg);background:var(--panel)}
+.tabs a.on{color:var(--brass);border-bottom-color:var(--brass)}
+.whoami{flex:none;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.whoami b{color:var(--fg)}
+.dot{width:8px;height:8px;border-radius:50%;background:#b07acf;box-shadow:0 0 0 3px #b07acf33}
+
+/* main split */
+.main{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,3fr);gap:12px;min-height:0}
+.stage{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--ink);min-height:0}
+.rail{overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 18px 22px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.stage-tag{position:absolute;top:12px;left:14px;z-index:3;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:#0b0f14cc;padding:4px 8px;border-radius:4px;pointer-events:none}
+.placeholder-note{position:absolute;bottom:10px;left:14px;z-index:3;font-size:12px;color:var(--muted);font-style:italic;pointer-events:none}
+
+/* rail typography */
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rail h2{font-family:var(--display);font-weight:400;font-size:32px;line-height:1;margin:4px 0 0;text-wrap:balance;color:var(--fg)}
+.rail h3{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);margin:0 0 8px;font-weight:500}
+.rail p{margin:0;max-width:65ch}
+.sub{color:var(--muted);font-size:14px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:var(--raise)}
+.chip.good{color:var(--good);border-color:#74c27a55}.chip.warn{color:var(--warn);border-color:#e3b04b55}.chip.crit{color:var(--crit);border-color:#e0605a55}
+.chip.brass{color:var(--brass);border-color:#cfa95566}.chip.verd{color:var(--verd);border-color:#5fa59a66}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--raise);border-radius:8px;padding:8px 10px}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.stat .v{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--raise);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--good)}
+.hpline{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:5px;font-variant-numeric:tabular-nums}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.list li{display:flex;gap:10px;align-items:baseline;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .r{font-family:var(--mono);font-size:13px;color:var(--brass);white-space:nowrap;font-variant-numeric:tabular-nums}
+.btn{background:var(--raise);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font-weight:500}
+.btn:hover{border-color:var(--brass)}
+.btn.primary{background:var(--brass);color:#16120a;border-color:var(--brass)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.link{background:none;border:0;padding:0;color:var(--verd);text-decoration:underline;text-underline-offset:3px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.check input{accent-color:var(--brass);margin-top:3px}
+.check.done span{color:var(--muted);text-decoration:line-through}
+
+/* party stage */
+.fig-wrap{position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end;padding-bottom:96px}
+.fig{height:92%;max-width:100%}
+.hero-name{position:absolute;top:40px;left:16px;z-index:2;max-width:55%}
+.hero-name .n{font-family:var(--display);font-size:clamp(34px,5vw,58px);line-height:.95;text-wrap:balance}
+.hero-name .c{color:var(--muted);margin-top:6px}
+.roster{position:absolute;left:12px;right:12px;bottom:12px;z-index:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rcard{display:flex;gap:10px;align-items:center;text-align:left;background:#171d25e6;border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+.rcard.on{border-color:var(--brass)}
+.rcard .av{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:17px;color:#0b0f14}
+.rcard .t{min-width:0}
+.rcard .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.rcard .t small{color:var(--muted);font-size:12px}
+.rcard .bar{display:block;height:4px;margin-top:4px}
+
+/* sheet stage */
+.sheet-stage{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:12px;padding:44px 16px 16px}
+.slots{display:flex;flex-direction:column;justify-content:center;gap:10px}
+.slot{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.slot .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.slot .v{font-size:14px;overflow-wrap:anywhere}
+.slot.empty .v{color:var(--muted);font-style:italic}
+.sheet-fig{display:flex;justify-content:center;align-items:center;min-height:0}
+.sheet-fig .fig{height:100%}
+.ribbon{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.ribbon .stat{background:var(--panel);border:1px solid var(--line);text-align:center}
+.hpctl{display:flex;align-items:center;justify-content:center;gap:6px}
+.hpctl button{width:24px;height:24px;border-radius:5px;border:1px solid var(--line);background:var(--raise);line-height:1;padding:0}
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.subtabs button{background:none;border:0;padding:8px 10px;color:var(--muted);border-bottom:2px solid transparent;font-weight:500}
+.subtabs button.on{color:var(--brass);border-bottom-color:var(--brass)}
+.abil{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.abil .stat{text-align:center}
+.abil .m{font-family:var(--mono);font-size:22px}
+.abil .s{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sk{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.sk .p{width:9px;height:9px;border-radius:50%;border:1px solid var(--muted)}
+.sk .p.on{background:var(--brass);border-color:var(--brass)}
+.sk .p.ex{background:var(--brass);border-color:var(--brass);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--brass)}
+.sk .a{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:6px}
+.sk .b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pips{display:flex;gap:6px}
+.pip{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--brass);background:var(--brass)}
+.pip.used{background:transparent;border-color:var(--line)}
+
+/* quests */
+.board{position:absolute;inset:0;overflow:auto;padding:48px 16px 16px;
+  background:radial-gradient(circle at 30% 20%,#2a2219 0,#1a1611 70%)}
+.qfilter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.qfilter button{background:#0b0f14aa;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.qfilter button.on{color:var(--brass);border-color:var(--brass)}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 18px}
+.note{position:relative;text-align:left;background:#e4dccb;color:#2a241a;border:0;border-radius:2px;padding:22px 16px 16px;min-height:150px;
+  box-shadow:0 8px 18px #0008;transform:rotate(var(--r,0deg));transition:transform .15s}
+.note:hover{transform:rotate(0) translateY(-3px)}
+.note.on{outline:3px solid var(--brass);outline-offset:3px}
+.note::before{content:"";position:absolute;top:8px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--crit);box-shadow:0 2px 3px #0007}
+.note h4{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.05;margin:4px 0 8px;text-wrap:balance}
+.note p{margin:0;font-size:13.5px;line-height:1.35}
+.stamp{position:absolute;right:10px;bottom:10px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid currentColor;padding:2px 6px;transform:rotate(-6deg)}
+.stamp.active{color:#7a5a12}.stamp.rumour{color:#3e5d74}.stamp.completed{color:#3f6b3f}
+.note.completed{opacity:.7}
+
+/* maps */
+.map{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.map:active{cursor:grabbing}
+.pin{cursor:pointer}
+.pin .ring{fill:none;stroke:var(--brass);stroke-width:2;opacity:0}
+.pin.on .ring{opacity:1}
+.pin:hover .dotc{filter:brightness(1.25)}
+.pin text{font-family:var(--body);font-weight:700;paint-order:stroke;stroke:#0b0f14;stroke-width:4px;stroke-linejoin:round;fill:var(--fg)}
+.mapctl{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:12px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.mapctl button{width:34px;height:34px;border-radius:7px;background:#171d25ee;border:1px solid var(--line);font-family:var(--mono);font-size:16px}
+.legend{position:absolute;left:14px;bottom:12px;z-index:3;display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);background:#0b0f14cc;padding:6px 10px;border-radius:6px;max-width:calc(100% - 80px)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+/* merchants */
+.shop{position:absolute;inset:0;overflow:auto;padding:46px 16px 16px;display:flex;flex-direction:column;gap:16px}
+.mtabs{display:flex;gap:8px;flex-wrap:wrap}
+.mtabs button{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px 8px 8px;text-align:left}
+.mtabs button.on{border-color:var(--brass)}
+.mav{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:20px;color:#0b0f14;flex:none}
+.mtabs small{display:block;color:var(--muted);font-size:12px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.item.on{border-color:var(--brass);background:var(--raise)}
+.item svg{width:44px;height:44px}
+.item b{font-weight:500;font-size:14px;line-height:1.2}
+.item .pr{margin-top:auto;font-family:var(--mono);font-size:13px;color:var(--brass)}
+.r-common{color:var(--muted)}.r-uncommon{color:var(--good)}.r-rare{color:#6aa3e6}
+
+/* combat */
+.combat-svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.init{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.init li button{width:100%;display:grid;grid-template-columns:30px 22px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--raise);border:1px solid transparent;border-radius:7px;padding:6px 8px;text-align:left}
+.init li button.cur{border-color:var(--brass)}
+.init li button.sel{background:#2a3340}
+.init li button.down{opacity:.45}
+.init .iv{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:center}
+.init .tk{width:18px;height:18px;border-radius:50%}
+.init .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.turnbanner{background:var(--raise);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.turnbanner.you{background:#2b2617;border:1px solid #cfa95566}
+.small{font-size:13px;color:var(--muted)}
+
+@media (max-width:860px){
+  .app{height:auto;min-height:100%}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .stage{height:62vh;min-height:380px}
+  .rail{overflow:visible}
+  .whoami{display:none}
+  .roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fig-wrap{padding-bottom:132px}
+  .hero-name{max-width:70%}
+  .ribbon{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sheet-stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr);overflow:auto}
+  .sheet-fig{display:none}
+}
+@media (max-width:480px){
+  .nav{flex-wrap:wrap;gap:6px 16px}
+  .tabs{flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="nav">
+    <div class="brand"><span class="brand-mark">Saltmere</span><span class="brand-sub">Gullwater Coast · Session 14</span></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#party" data-view="party">Party</a>
+      <a href="#sheet" data-view="sheet">My Sheet</a>
+      <a href="#quests" data-view="quests">Quests</a>
+      <a href="#locations" data-view="locations">Locations</a>
+      <a href="#services" data-view="services">Services</a>
+      <a href="#merchants" data-view="merchants">Merchants</a>
+      <a href="#combat" data-view="combat">Combat</a>
+    </nav>
+    <div class="whoami"><span class="dot"></span>Playing as <b>Ysolde</b></div>
+  </header>
+  <main class="main">
+    <section class="stage" id="stage" aria-label="Main view"></section>
+    <aside class="rail" id="rail" aria-label="Details"></aside>
+  </main>
+</div>
+
+<script>
+/* ---------- utils ---------- */
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem('saltmere:'+k);return v?JSON.parse(v):d}catch(e){return d}},
+             set(k,v){try{localStorage.setItem('saltmere:'+k,JSON.stringify(v))}catch(e){}}};
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=amt<0?0:255,p=Math.abs(amt);
+  r=Math.round(r+(t-r)*p);g=Math.round(g+(t-g)*p);b=Math.round(b+(t-b)*p);return'#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+const mod=s=>Math.floor((s-10)/2), sgn=n=>(n>=0?'+':'')+n;
+const pct=(a,b)=>Math.max(0,Math.min(100,a/b*100));
+const hpColor=p=>p>50?'var(--good)':p>25?'var(--warn)':'var(--crit)';
+let uid=0;
+
+/* ---------- placeholder figure art ---------- */
+function figure(c,prop){
+  const u=++uid, dk=shade(c,-.55), md=shade(c,-.3);
+  const props={
+    sword:`<path d="M213 305 L221 118 L229 305Z" fill="#cfd6dc"/><rect x="204" y="300" width="34" height="7" rx="2" fill="#cfa955"/><rect x="216" y="306" width="10" height="26" fill="#5a3e22"/>`,
+    lute:`<ellipse cx="96" cy="318" rx="30" ry="38" fill="#7a4e28"/><circle cx="96" cy="316" r="8" fill="#2a1a0c"/><rect x="91" y="210" width="10" height="80" fill="#5a3a1c" transform="rotate(-14 96 290)"/>`,
+    daggers:`<path d="M84 300 L80 368 L90 300Z" fill="#cfd6dc"/><rect x="76" y="294" width="16" height="6" fill="#cfa955"/><path d="M216 300 L220 368 L210 300Z" fill="#cfd6dc"/><rect x="208" y="294" width="16" height="6" fill="#cfa955"/>`,
+    mace:`<circle cx="84" cy="262" r="44" fill="${shade(c,-.15)}" stroke="#cfa955" stroke-width="4"/><path d="M84 232 L84 292 M54 262 L114 262" stroke="#cfa955" stroke-width="5"/><rect x="211" y="230" width="8" height="80" fill="#5a3e22"/><circle cx="215" cy="226" r="15" fill="#9aa3ab"/>`
+  };
+  return `<svg class="fig" viewBox="0 0 300 520" aria-hidden="true">
+  <defs><radialGradient id="ga${u}" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="${c}" stop-opacity=".32"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gb${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${dk}"/></linearGradient></defs>
+  <ellipse cx="150" cy="260" rx="150" ry="250" fill="url(#ga${u})"/>
+  <ellipse cx="150" cy="500" rx="82" ry="12" fill="#000" opacity=".5"/>
+  <path d="M128 360 L118 494 L140 494 L149 382Z M172 360 L182 494 L160 494 L151 382Z" fill="${shade(c,-.65)}"/>
+  <path d="M98 172 C78 204 72 254 78 304 L94 304 C94 262 100 222 114 192Z M202 172 C222 204 228 254 222 304 L206 304 C206 262 200 222 186 192Z" fill="${md}"/>
+  <path d="M150 128 C112 128 98 150 92 190 L78 384 C112 400 188 400 222 384 L208 190 C202 150 188 128 150 128Z" fill="url(#gb${u})"/>
+  <rect x="96" y="252" width="108" height="9" fill="#cfa955" opacity=".85"/>
+  <path d="M110 116 C108 62 192 62 190 116 L182 146 L118 146Z" fill="${shade(c,-.2)}"/>
+  <ellipse cx="150" cy="108" rx="20" ry="25" fill="#0b0e12" opacity=".75"/>
+  ${props[prop]||''}
+  </svg>`;
+}
+
+/* ---------- sample campaign data ---------- */
+const PARTY=[
+ {id:'ysolde',name:'Ysolde Fen',you:true,player:'J',race:'Half-elf',cls:'Bard',sub:'College of Lore',lvl:5,color:'#b07acf',prop:'lute',max:38,ac:14,speed:30,pp:14,
+  bio:'Wandering collector of sea shanties and other people\'s secrets. Owes the Archivists\' Guild a favour she would rather not discuss.',
+  bonds:['Keeps a locket from her mother, a lighthouse keeper','Rival of the bard Corvin Ashe in Vael']},
+ {id:'brannoc',name:'Brannoc Ashvale',player:'Mia',race:'Human',cls:'Fighter',sub:'Battle Master',lvl:5,color:'#c9714f',prop:'sword',hp:44,max:49,ac:18,speed:30,pp:12,
+  bio:'Former harbour watch sergeant, dismissed after refusing a bribe from the Gullwater smugglers. Carries his old badge anyway.',
+  bonds:['Sworn to find the captain who framed him','Trains with Hollis at the forge']},
+ {id:'kett',name:'Kett',player:'Sam',race:'Tabaxi',cls:'Rogue',sub:'Swashbuckler',lvl:5,color:'#5fa59a',prop:'daggers',hp:22,max:33,ac:15,speed:30,pp:15,
+  bio:'Collects shiny stories the way others collect coins. Claims to have sailed every ship in the harbour, at least once, uninvited.',
+  bonds:['Looking for the "singing bell" from a childhood tale','Owes Pell Marrow 30 gp']},
+ {id:'oriel',name:'Oriel Thorne',player:'Dev',race:'Hill Dwarf',cls:'Cleric',sub:'Life Domain',lvl:5,color:'#d8b65a',prop:'mace',hp:40,max:43,ac:18,speed:25,pp:15,
+  bio:'Priest of the Tide Mother, sent from the mountain shrines to tend the drowned. Distrusts the sea but loves fish stew.',
+  bonds:['Answers to Brother Calden at the temple','Searching for her lost clan relic in Ironcrag']},
+];
+const SHEET={str:8,dex:14,con:13,int:10,wis:12,cha:18,prof:3,
+ saves:['dex','cha'],
+ skills:[['Acrobatics','dex'],['Animal Handling','wis'],['Arcana','int'],['Athletics','str'],['Deception','cha',1],['History','int',1],['Insight','wis',1],['Intimidation','cha'],['Investigation','int'],['Medicine','wis'],['Nature','int'],['Perception','wis',1],['Performance','cha',2],['Persuasion','cha',2],['Religion','int'],['Sleight of Hand','dex'],['Stealth','dex'],['Survival','wis']],
+ slots:{1:4,2:3,3:2},
+ cantrips:['Vicious Mockery','Minor Illusion','Mage Hand'],
+ spells:{1:['Healing Word','Dissonant Whispers','Faerie Fire','Thunderwave'],2:['Suggestion','Heat Metal'],3:['Hypnotic Pattern','Leomund\'s Tiny Hut']},
+ gear:[['Rapier','+5 to hit · 1d8+2 piercing'],['Dagger ×2','+5 to hit · 1d4+2, thrown 20/60 ft'],['Studded leather','AC 12 + Dex'],['Lute','Spellcasting focus'],['Explorer\'s pack','Bedroll, rations ×6, 50 ft rope'],['Tidewrought locket','Hums near deep water']],
+ purse:{gp:47,sp:12,cp:30},
+ equip:{left:[['Head',null],['Neck','Tidewrought locket'],['Body','Studded leather'],['Cloak','Fenweave cloak']],right:[['Main hand','Rapier'],['Off hand','Lute'],['Ring',null],['Feet','Traveller\'s boots']]}
+};
+const QUESTS=[
+ {id:'q1',title:'The Drowned Bell',status:'active',giver:'Harbourmaster Odile Vask',loc:'lighthouse',r:'-2deg',
+  hook:'A bell rings beneath the waves each night. The ferry won\'t sail until it stops.',
+  text:'Fishermen report a bell tolling from the water below the Old Lighthouse after dark. Since it started, two boats have gone missing and the Vael ferry is suspended.',
+  obj:['Speak with the lighthouse keeper\'s widow','Reach the Old Lighthouse at low tide','Find the source of the bell','Report back to Odile Vask'],reward:'150 gp and free ferry passage'},
+ {id:'q2',title:'Barrow of Greyhollow',status:'active',giver:'Brother Calden',loc:'barrow',r:'1.5deg',
+  hook:'Grave goods are walking out of the barrow. The temple wants them back.',
+  text:'Someone has broken the seals on the Greyhollow barrow. Brother Calden asks the party to recover the funerary urn and reseal the tomb before the solstice.',
+  obj:['Investigate the broken seals','Recover the funerary urn','Reseal the barrow door'],reward:'100 gp and two Potions of Healing'},
+ {id:'q3',title:'The Missing Shipment',status:'active',giver:'Hollis Brandt',loc:'ironcrag',r:'-1deg',
+  hook:'Three wagons of ore never came down from Ironcrag Pass.',
+  text:'Hollis\'s ore shipment is a week late. The drivers were last seen at the waystation below the pass.',
+  obj:['Visit the waystation','Track the wagons into the pass','Return the ore or the drivers'],reward:'A silvered weapon of your choice'},
+ {id:'q4',title:'Lights over the Fen',status:'rumour',giver:'Tavern talk at the Drowned Lantern',loc:'fen',r:'2.5deg',
+  hook:'Blue lights drift over the Whispering Fen on moonless nights.',
+  text:'Locals say the lights lead travellers off the causeway. A few say they lead somewhere worth going.',
+  obj:['Find someone who has followed the lights'],reward:'Unknown'},
+ {id:'q5',title:'Rats in the Cellar',status:'completed',giver:'Marta, innkeeper',loc:'saltmere',r:'-3deg',
+  hook:'Something bigger than rats is eating the Lantern\'s cheese.',
+  text:'Cleared a nest of giant rats from the Drowned Lantern\'s cellar and found a sealed smuggler\'s tunnel behind the casks.',
+  obj:['Clear the cellar','Tell Marta what you found'],reward:'Free lodging for a month (claimed)'},
+ {id:'q6',title:'The Vael Cipher',status:'rumour',giver:'A note slipped under Ysolde\'s door',loc:'vael',r:'1deg',
+  hook:'"The ruins remember the old tongue. Bring the locket."',
+  text:'An unsigned note in a hand Ysolde almost recognises. It mentions the ruins on the isle of Vael and her mother\'s locket.',
+  obj:['Work out who wrote the note','Find passage to Vael'],reward:'Unknown'},
+];
+const LOCS={
+ saltmere:{name:'Saltmere',type:'Port town',status:'visited',ang:125,f:.88,desc:'A salt-crusted harbour town of fishers, smugglers and one very tired harbourmaster. The party\'s home base.',facts:['Population about 2,400','Ferry to Vael currently suspended','Market day is Godsday']},
+ lighthouse:{name:'Old Lighthouse',type:'Ruin · Coast',status:'known',ang:178,f:.96,desc:'Dark for eleven years since the keeper drowned. Reachable on foot only at low tide.',facts:['Half a day\'s walk west of Saltmere','Causeway floods at high tide']},
+ barrow:{name:'Greyhollow Barrow',type:'Tomb',status:'visited',ang:228,f:.52,desc:'An ancient hill tomb in the Greyhollow woods. The temple keeps its seals.',facts:['Seals found broken (Session 12)','Wolves seen nearby']},
+ fen:{name:'Whispering Fen',type:'Marsh',status:'rumoured',ang:58,f:.58,desc:'Reed beds and black water, crossed by a single plank causeway.',facts:['Locals avoid it after dark']},
+ ironcrag:{name:'Ironcrag Pass',type:'Mountain pass',status:'known',ang:300,f:.74,desc:'The only road through the Ironcrags, used by ore wagons from the dwarven mines.',facts:['Waystation at the foot of the pass','Snow closes it in winter']},
+ vael:{name:'Ruins of Vael',type:'Island ruin',status:'rumoured',island:true,desc:'Broken towers on a small island two hours by ferry. Few people go there and fewer talk about it.',facts:['Only reachable by boat']}
+};
+const SERVICES={
+ inn:{name:'The Drowned Lantern',kind:'Inn & tavern',who:'Marta Greel',x:360,y:252,c:'#e3b04b',open:'Always open',
+   list:[['Modest room','5 sp / night'],['Comfortable room','8 sp / night'],['Hot meal','3 sp'],['Ale, mug','4 cp'],['Bath','2 sp']],note:'Your party lodges here for free this month.'},
+ temple:{name:'Temple of the Tide Mother',kind:'Temple · Healing',who:'Brother Calden',x:150,y:112,c:'#5fa59a',open:'Dawn to dusk',
+   list:[['Cure Wounds','10 gp'],['Lesser Restoration','40 gp'],['Remove Curse','90 gp'],['Blessing for a voyage','Donation']],note:'Oriel can request services at cost.'},
+ forge:{name:'Hollis Forge',kind:'Smithy',who:'Hollis Brandt',x:572,y:378,c:'#e0605a',open:'Morning to late afternoon',
+   list:[['Repair armour','10% of value'],['Sharpen a blade','2 sp'],['Silver a weapon','100 gp'],['Custom work','Ask Hollis']],note:'Hollis also sells arms. See Merchants.'},
+ guild:{name:'Archivists\' Guild',kind:'Library · Lore',who:'Archivist Wren',x:780,y:112,c:'#6aa3e6',open:'By appointment',
+   list:[['Identify an item','20 gp'],['Research, per day','1 gp'],['Copy of a map','5 gp'],['Translate a text','10 gp']],note:'Ysolde owes the guild a favour.'},
+ stables:{name:'Gull & Anchor Stables',kind:'Stables',who:'Teo Marsh',x:126,y:378,c:'#c9714f',open:'Always open',
+   list:[['Riding horse hire','2 gp / day'],['Cart hire','1 gp / day'],['Stabling','5 sp / night']],note:''},
+ ferry:{name:'Harbour Ferry',kind:'Transport',who:'Captain Isla Rook',x:560,y:510,c:'#9aa3ab',open:'Suspended',
+   list:[['Passage to Vael','2 gp (suspended)'],['Charter a boat','Ask the captain']],note:'Suspended until the Drowned Bell is dealt with.'}
+};
+const MERCH={
+ m1:{name:'Pell\'s Curios',who:'Pell Marrow',race:'Rock gnome',mood:'Friendly',c:'#b07acf',
+   items:[['Potion of Healing','potion','common',50,'0.5 lb','Regain 2d4 + 2 hit points when you drink it.'],
+          ['Tidecaller Shell','curio','uncommon',300,'1 lb','Once per day, speak with a sea creature for 10 minutes.'],
+          ['Driftglass Lens','curio','common',25,'—','Shows faint shimmering where invisible ink has been used.'],
+          ['Scroll: Detect Magic','scroll','common',60,'—','A spell scroll holding Detect Magic.'],
+          ['Bag of Holding','gear','uncommon',500,'15 lb','Holds up to 500 lb in a space far larger than its outside.'],
+          ['Potion of Water Breathing','potion','uncommon',180,'0.5 lb','Breathe underwater for 1 hour.']]},
+ m2:{name:'Hollis Forge',who:'Hollis Brandt',race:'Human',mood:'Gruff',c:'#e0605a',
+   items:[['Longsword','blade','common',15,'3 lb','1d8 slashing, versatile (1d10).'],
+          ['Shield','armour','common',10,'6 lb','+2 to AC.'],
+          ['Chain Shirt','armour','common',50,'20 lb','AC 13 + Dex (max 2).'],
+          ['Silvered Dagger','blade','common',102,'1 lb','Overcomes resistance to non-silvered attacks.'],
+          ['Crossbow Bolts (20)','gear','common',1,'1.5 lb','Ammunition for crossbows.']]},
+ m3:{name:'Market Row Provisioner',who:'Auntie Brine',race:'Halfling',mood:'Chatty',c:'#74c27a',
+   items:[['Rations (1 day)','gear','common',.5,'2 lb','Dried fish, hard bread and something pickled.'],
+          ['Hempen Rope, 50 ft','gear','common',1,'10 lb','Strong enough for most climbs.'],
+          ['Healer\'s Kit','gear','common',5,'3 lb','Ten uses. Stabilise a creature at 0 hit points.'],
+          ['Hooded Lantern','gear','common',5,'2 lb','Bright light 30 ft, dim light 30 ft more.'],
+          ['Torch','gear','common',.01,'1 lb','Burns for 1 hour.']]}
+};
+
+/* ---------- state ---------- */
+const S={view:'party',party:'ysolde',quest:'q1',qFilter:'all',loc:'saltmere',svc:'inn',merch:'m1',item:0,sheetTab:'stats',
+  hp:store.get('hp',31),used:store.get('used',{1:1,2:0,3:0}),insp:store.get('insp',3),checks:store.get('checks',{q1:[0],q2:[0,1],q5:[0,1]}),req:store.get('req',{})};
+const fmtPrice=p=>p>=1?`${p} gp`:p>=.1?`${Math.round(p*10)} sp`:`${Math.round(p*100)} cp`;
+
+/* ---------- pan & zoom for svg maps ---------- */
+function panZoom(svg,W,H){
+  let vb={x:0,y:0,w:W,h:H},down=null,dragged=false;
+  const apply=()=>svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const clamp=()=>{vb.w=Math.max(W/4,Math.min(W,vb.w));vb.h=vb.w*H/W;vb.x=Math.max(0,Math.min(W-vb.w,vb.x));vb.y=Math.max(0,Math.min(H-vb.h,vb.y))};
+  const zoomAt=(f,px,py)=>{const nw=Math.max(W/4,Math.min(W,vb.w*f)),k=nw/vb.w;vb.x=px-(px-vb.x)*k;vb.y=py-(py-vb.y)*k;vb.w=nw;clamp();apply()};
+  const toSvg=e=>{const r=svg.getBoundingClientRect();const s=Math.max(r.width/vb.w,r.height/vb.h);
+    return[vb.x+(e.clientX-r.left-(r.width-vb.w*s)/2)/s,vb.y+(e.clientY-r.top-(r.height-vb.h*s)/2)/s,s]};
+  svg.addEventListener('wheel',e=>{e.preventDefault();const[p,q]=toSvg(e);zoomAt(e.deltaY>0?1.15:1/1.15,p,q)},{passive:false});
+  svg.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y,id:e.pointerId};dragged=false});
+  svg.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;
+    if(!dragged&&Math.hypot(dx,dy)>5){dragged=true;try{svg.setPointerCapture(down.id)}catch(_){}}
+    if(dragged){const s=toSvg(e)[2];vb.x=down.vx-dx/s;vb.y=down.vy-dy/s;clamp();apply()}});
+  const up=()=>{down=null};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  svg.addEventListener('click',e=>{if(dragged){e.stopPropagation();e.preventDefault();dragged=false}},true);
+  apply();
+  return{zoom:f=>zoomAt(f,vb.x+vb.w/2,vb.y+vb.h/2),reset:()=>{vb={x:0,y:0,w:W,h:H};apply()}};
+}
+const mapCtl=`<div class="mapctl"><button data-act="zin" aria-label="Zoom in">+</button><button data-act="zout" aria-label="Zoom out">−</button><button data-act="zreset" aria-label="Reset view">⌂</button></div>`;
+let PZ=null;
+
+/* ---------- world map generation ---------- */
+function blob(cx,cy,r,seed,n=72,amp=.28){
+  const R=mulberry(seed),h=[1,2,3,5,8].map(k=>({k,a:(R()*2-1)*amp/Math.sqrt(k),p:R()*6.283})),pts=[];
+  for(let i=0;i<n;i++){const t=i/n*6.283;let m=1;h.forEach(o=>m+=o.a*Math.sin(o.k*t+o.p));pts.push([cx+Math.cos(t)*r*m*1.25,cy+Math.sin(t)*r*m*.85])}
+  const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let s=mid(pts[n-1],pts[0]),d=`M${s[0].toFixed(1)} ${s[1].toFixed(1)}`;
+  for(let i=0;i<n;i++){const p=pts[i],m=mid(p,pts[(i+1)%n]);d+=`Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`}
+  return{d:d+'Z',pts,c:[cx,cy]};
+}
+const WORLD=(()=>{
+  const main=blob(520,350,240,11),isl=blob(870,590,48,4,40,.2),i2=blob(150,170,44,9,40,.25),i3=blob(190,590,30,23,36,.25);
+  const pos={};
+  for(const[id,l]of Object.entries(LOCS)){
+    if(l.island){pos[id]=isl.c;continue}
+    const p=main.pts[Math.round(l.ang/360*main.pts.length)%main.pts.length];
+    pos[id]=[main.c[0]+(p[0]-main.c[0])*l.f,main.c[1]+(p[1]-main.c[1])*l.f];
+  }
+  return{main,isl,i2,i3,pos};
+})();
+function worldSVG(){
+  const{main,isl,i2,i3,pos}=WORLD,R=mulberry(5);
+  const islands=[main,isl,i2,i3];
+  let deco='';
+  // mountains near Ironcrag
+  const[mx,my]=pos.ironcrag;
+  for(let i=0;i<14;i++){const x=mx-90+R()*170,y=my-60+R()*90,s=10+R()*10;deco+=`<path d="M${x-s} ${y} L${x} ${y-s*1.4} L${x+s} ${y}Z" fill="#59665a" stroke="#2a332b" stroke-width="1.2"/><path d="M${x} ${y-s*1.4} L${x+s*.35} ${y-s*.9} L${x} ${y-s*.95}Z" fill="#d6d9d2" opacity=".8"/>`}
+  // forest near barrow
+  const[bx,by]=pos.barrow;
+  for(let i=0;i<34;i++){const a=R()*6.28,d=R()*80;const x=bx+Math.cos(a)*d*1.3,y=by+Math.sin(a)*d*.8;deco+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(5+R()*4).toFixed(1)}" fill="#2c3d2c" stroke="#1f2b1f"/>`}
+  // fen tufts
+  const[fx,fy]=pos.fen;
+  for(let i=0;i<26;i++){const x=fx-70+R()*140,y=fy-40+R()*80;deco+=`<path d="M${x} ${y} l-4 -7 M${x} ${y} l0 -9 M${x} ${y} l4 -7" stroke="#6f8b70" stroke-width="1.3"/>`}
+  deco+=`<ellipse cx="${fx}" cy="${fy+8}" rx="60" ry="26" fill="#2a4140" opacity=".6"/>`;
+  const road=(a,b,bend=30)=>{const[ax,ay]=pos[a],[bx2,by2]=pos[b];const qx=(ax+bx2)/2+bend,qy=(ay+by2)/2-bend;return`<path d="M${ax} ${ay} Q${qx} ${qy} ${bx2} ${by2}" fill="none" stroke="#b9a271" stroke-width="2.4" stroke-dasharray="7 6" opacity=".75"/>`};
+  const roads=road('saltmere','barrow',-30)+road('saltmere','fen',25)+road('barrow','ironcrag',20)+road('saltmere','lighthouse',15);
+  const[sx,sy]=pos.saltmere,[vx,vy]=pos.vael;
+  const sea=`<path d="M${sx} ${sy} Q${(sx+vx)/2} ${vy+40} ${vx-20} ${vy}" fill="none" stroke="#7fb3c2" stroke-width="2" stroke-dasharray="3 7" opacity=".7"/>`;
+  const pins=Object.entries(LOCS).map(([id,l])=>{const[x,y]=pos[id];const col=l.status==='visited'?'#cfa955':l.status==='known'?'#5fa59a':'#95a0aa';
+    return`<g class="pin" data-pin="${id}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><title>${l.name}</title>
+    <circle class="ring" r="17"/><circle class="dotc" r="10" fill="${col}" stroke="#0b0f14" stroke-width="3"/>${l.status==='rumoured'?'<text y="4" text-anchor="middle" font-size="12" style="stroke-width:0;fill:#0b0f14">?</text>':''}
+    <text y="-20" text-anchor="middle" font-size="15">${l.name}</text></g>`}).join('');
+  const waves=Array.from({length:40},()=>{const x=R()*1000,y=R()*700;return`<path d="M${x} ${y} q6 -5 12 0 t12 0" fill="none" stroke="#2a5363" stroke-width="1.2"/>`}).join('');
+  return`<svg class="map" id="worldmap" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="World map of the Gullwater Coast">
+  <defs><filter id="rough"><feTurbulence baseFrequency=".03" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="6"/></filter>
+  <radialGradient id="seaG" cx="50%" cy="50%" r="70%"><stop offset="0" stop-color="#1b3c48"/><stop offset="1" stop-color="#0f222a"/></radialGradient></defs>
+  <rect width="1000" height="700" fill="url(#seaG)"/>${waves}
+  ${islands.map(b=>`<path d="${b.d}" fill="none" stroke="#2f5a68" stroke-width="16" opacity=".55"/>`).join('')}
+  <g filter="url(#rough)">${islands.map(b=>`<path d="${b.d}" fill="#38483a" stroke="#c9bb92" stroke-width="2"/>`).join('')}</g>
+  <path d="${main.d}" fill="#465843" opacity=".35" transform="translate(520 350) scale(.7) translate(-520 -350)"/>
+  ${roads}${sea}${deco}
+  <text x="70" y="400" font-family="Pirata One, Georgia, serif" font-size="30" fill="#7fb3c2" opacity=".55" transform="rotate(-8 70 400)">Gullwater Sound</text>
+  <g transform="translate(920 90)" opacity=".8"><circle r="30" fill="none" stroke="#c9bb92"/><path d="M0 -34 L6 0 L0 34 L-6 0Z" fill="#c9bb92"/><path d="M-34 0 L0 6 L34 0 L0 -6Z" fill="#c9bb9266"/><text y="-40" text-anchor="middle" font-size="12" fill="#c9bb92" font-family="IBM Plex Mono, monospace">N</text></g>
+  <g transform="translate(40 660)" font-family="IBM Plex Mono, monospace" font-size="11" fill="#c9bb92"><rect width="100" height="4" fill="#c9bb92"/><rect x="50" width="50" height="4" fill="#0f222a"/><text y="-6">0</text><text x="88" y="-6">20 mi</text></g>
+  ${pins}
+  <g transform="translate(${sx} ${sy+30})"><rect x="-38" y="-9" width="76" height="18" rx="9" fill="#cfa955"/><text text-anchor="middle" y="4" font-size="11" font-family="IBM Plex Mono, monospace" fill="#16120a">PARTY HERE</text></g>
+  </svg>`;
+}
+
+/* ---------- town map ---------- */
+function townSVG(){
+  const R=mulberry(77);let b='';
+  const cols=[[40,240],[270,450],[480,660],[690,870]],rows=[[40,180],[210,295],[325,430]];
+  rows.forEach(([y0,y1])=>cols.forEach(([x0,x1])=>{
+    let x=x0;while(x<x1-20){const w=24+R()*40;let y=y0;while(y<y1-18){const h=22+R()*30;if(y+h<=y1&&x+w<=x1&&R()>.15)b+=`<rect x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${(w-5).toFixed(0)}" height="${(h-5).toFixed(0)}" rx="2" fill="${R()>.5?'#4a3f35':'#55483c'}" stroke="#2a221b"/>`;y+=h}x+=w}
+  }));
+  const pins=Object.entries(SERVICES).map(([id,s])=>`<g class="pin" data-pin="${id}" transform="translate(${s.x} ${s.y})"><title>${s.name}</title><circle class="ring" r="21"/><circle class="dotc" r="14" fill="${s.c}" stroke="#0b0f14" stroke-width="3"/><text y="-24" text-anchor="middle" font-size="15">${s.name}</text></g>`).join('');
+  return`<svg class="map" id="townmap" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Map of Saltmere town">
+  <rect width="900" height="600" fill="#2b2a24"/>
+  <g stroke="#7a6d58" stroke-width="22" stroke-linecap="round" fill="none" opacity=".9"><path d="M0 195 H900 M0 310 H900 M255 0 V450 M465 0 V450 M675 0 V450"/></g>
+  <g stroke="#3a352c" stroke-width="1" stroke-dasharray="2 5" fill="none"><path d="M0 195 H900 M0 310 H900 M255 0 V450 M465 0 V450 M675 0 V450"/></g>
+  ${b}
+  <path d="M0 455 Q120 440 240 456 T480 452 T720 458 T900 450 V600 H0Z" fill="#15303a"/>
+  <path d="M0 455 Q120 440 240 456 T480 452 T720 458 T900 450" fill="none" stroke="#c9bb92" stroke-width="2"/>
+  <g fill="#6b5a44" stroke="#2a221b"><rect x="530" y="450" width="60" height="110"/><rect x="300" y="452" width="30" height="80"/><rect x="760" y="452" width="30" height="90"/></g>
+  <g fill="#c9bb92" opacity=".7"><path d="M352 540 l14 -18 l14 18Z"/><path d="M812 555 l12 -16 l12 16Z"/></g>
+  <circle cx="465" cy="252" r="30" fill="#5a4c3b" stroke="#2a221b"/><text x="465" y="256" text-anchor="middle" font-size="11" fill="#c9bb92" font-family="IBM Plex Mono, monospace">MARKET</text>
+  <text x="40" y="585" font-family="Pirata One, Georgia, serif" font-size="26" fill="#7fb3c2" opacity=".6">Saltmere Harbour</text>
+  ${pins}</svg>`;
+}
+
+/* ---------- item icon ---------- */
+function icon(kind,c){
+  const p={potion:`<path d="M18 6h8v8l8 12a8 8 0 0 1-7 12H17a8 8 0 0 1-7-12l8-12z" fill="${c}" opacity=".85"/><rect x="17" y="3" width="10" height="4" rx="1" fill="#c9bb92"/>`,
+    blade:`<path d="M34 6 L38 10 L16 32 L12 28Z" fill="#cfd6dc"/><path d="M10 26 L18 34 M14 30 L8 36" stroke="#cfa955" stroke-width="3"/>`,
+    scroll:`<rect x="10" y="10" width="24" height="24" rx="2" fill="#e4dccb"/><rect x="7" y="8" width="30" height="5" rx="2.5" fill="#b9a271"/><rect x="7" y="31" width="30" height="5" rx="2.5" fill="#b9a271"/><path d="M15 18h14M15 23h10" stroke="#5a4c3b" stroke-width="1.5"/>`,
+    armour:`<path d="M22 5 L36 10 V22 C36 31 29 37 22 40 C15 37 8 31 8 22 V10Z" fill="#7d8790" stroke="#cfa955" stroke-width="2"/>`,
+    gear:`<circle cx="22" cy="22" r="13" fill="none" stroke="#b9a271" stroke-width="4"/><circle cx="22" cy="22" r="6" fill="none" stroke="#b9a271" stroke-width="3"/>`,
+    curio:`<path d="M22 4 L36 18 L22 40 L8 18Z" fill="${c}"/><path d="M8 18 H36 M22 4 L16 18 L22 40 L28 18Z" fill="none" stroke="#0b0f14" stroke-opacity=".4"/>`};
+  return`<svg viewBox="0 0 44 44" aria-hidden="true">${p[kind]||p.gear}</svg>`;
+}
+
+/* ---------- views ---------- */
+const V={};
+V.party={stage(){
+  const p=PARTY.find(x=>x.id===S.party),hp=p.you?S.hp:p.hp;
+  return`<div class="stage-tag">Party · portrait</div>
+  <div class="hero-name"><div class="n">${p.name}</div><div class="c">${p.race} ${p.cls} · Level ${p.lvl}</div></div>
+  <div class="fig-wrap">${figure(p.color,p.prop)}</div>
+  <div class="roster">${PARTY.map(x=>{const h=x.you?S.hp:x.hp;return`<button class="rcard ${x.id===S.party?'on':''}" data-act="party" data-id="${x.id}">
+    <span class="av" style="background:${x.color}">${x.name[0]}</span><span class="t"><b>${x.name}${x.you?' (you)':''}</b><small>${x.cls} ${x.lvl}</small>
+    <span class="bar"><i style="width:${pct(h,x.max)}%;background:${hpColor(pct(h,x.max))}"></i></span></span></button>`}).join('')}</div>`;
+},rail(){
+  const p=PARTY.find(x=>x.id===S.party),hp=p.you?S.hp:p.hp,pc=pct(hp,p.max);
+  return`<div><div class="eyebrow">Played by ${p.player}</div><h2>${p.name}</h2><div class="sub">${p.race} · ${p.cls} (${p.sub}) · Level ${p.lvl}</div></div>
+  <div><div class="hpline"><span>Hit points</span><span>${hp} / ${p.max}</span></div><div class="bar"><i style="width:${pc}%;background:${hpColor(pc)}"></i></div></div>
+  <div class="stats"><div class="stat"><div class="k">AC</div><div class="v">${p.ac}</div></div><div class="stat"><div class="k">Speed</div><div class="v">${p.speed} ft</div></div><div class="stat"><div class="k">Passive Perc.</div><div class="v">${p.pp}</div></div></div>
+  <div><h3>What the party knows</h3><p>${p.bio}</p></div>
+  <div><h3>Bonds &amp; threads</h3><ul class="list">${p.bonds.map(b=>`<li>${b}</li>`).join('')}</ul></div>
+  ${p.you?`<button class="btn primary" data-act="goto" data-view="sheet">Open my character sheet</button>`:`<p class="small">You can see what your character would know. Full sheets are private to each player.</p>`}`;
+}};
+
+V.sheet={stage(){
+  const p=PARTY[0],e=SHEET.equip,pc=pct(S.hp,p.max);
+  const slot=([k,v])=>`<div class="slot ${v?'':'empty'}"><div class="k">${k}</div><div class="v">${v||'Empty'}</div></div>`;
+  return`<div class="stage-tag">My sheet · ${p.name}</div><div class="sheet-stage">
+  <div class="slots">${e.left.map(slot).join('')}</div>
+  <div class="sheet-fig">${figure(p.color,p.prop)}</div>
+  <div class="slots">${e.right.map(slot).join('')}</div>
+  <div class="ribbon">
+   <div class="stat"><div class="k">Hit points</div><div class="hpctl"><button data-act="hp" data-d="-1" aria-label="Lose 1 hit point">−</button><span class="v" style="color:${hpColor(pc)}">${S.hp}</span><button data-act="hp" data-d="1" aria-label="Gain 1 hit point">+</button></div></div>
+   <div class="stat"><div class="k">Armour class</div><div class="v">${p.ac}</div></div>
+   <div class="stat"><div class="k">Initiative</div><div class="v">${sgn(mod(SHEET.dex)+1)}</div></div>
+   <div class="stat"><div class="k">Speed</div><div class="v">${p.speed} ft</div></div>
+   <div class="stat"><div class="k">Proficiency</div><div class="v">+${SHEET.prof}</div></div>
+   <div class="stat"><div class="k">Inspiration d8</div><div class="hpctl"><button data-act="insp" data-d="-1" aria-label="Spend Bardic Inspiration">−</button><span class="v">${S.insp}/4</span><button data-act="insp" data-d="1" aria-label="Regain Bardic Inspiration">+</button></div></div>
+  </div></div><div class="placeholder-note">Art placeholder. Swap in character artwork later.</div>`;
+},rail(){
+  const sh=SHEET,t=S.sheetTab,tabs=[['stats','Stats'],['skills','Skills'],['spells','Spells'],['gear','Gear']];
+  let body='';
+  if(t==='stats'){
+    body=`<div class="abil">${['str','dex','con','int','wis','cha'].map(k=>`<div class="stat"><div class="k">${k}</div><div class="m">${sgn(mod(sh[k]))}</div><div class="s">${sh[k]}</div></div>`).join('')}</div>
+    <div><h3>Saving throws</h3>${['str','dex','con','int','wis','cha'].map(k=>{const pr=sh.saves.includes(k);return`<div class="sk"><span class="p ${pr?'on':''}"></span><span>${k.toUpperCase()}</span><span class="b">${sgn(mod(sh[k])+(pr?sh.prof:0))}</span></div>`}).join('')}</div>
+    <div><h3>Features</h3><ul class="list"><li>Bardic Inspiration (d8)<span class="r">4 / long rest</span></li><li>Jack of All Trades<span class="r">+1 unskilled</span></li><li>Font of Inspiration<span class="r">short rest</span></li><li>Cutting Words<span class="r">reaction</span></li></ul></div>`;
+  }else if(t==='skills'){
+    body=`<div>${sh.skills.map(([n,a,lv])=>{const b=mod(sh[a])+(lv===2?sh.prof*2:lv===1?sh.prof:1);return`<div class="sk"><span class="p ${lv===2?'ex':lv===1?'on':''}"></span><span>${n}<span class="a">${a.toUpperCase()}</span></span><span class="b">${sgn(b)}</span></div>`}).join('')}</div>
+    <p class="small">Filled dot: proficient. Ringed dot: expertise. Others include Jack of All Trades.</p>`;
+  }else if(t==='spells'){
+    const dc=8+sh.prof+mod(sh.cha);
+    body=`<div class="stats"><div class="stat"><div class="k">Save DC</div><div class="v">${dc}</div></div><div class="stat"><div class="k">Attack</div><div class="v">${sgn(sh.prof+mod(sh.cha))}</div></div><div class="stat"><div class="k">Ability</div><div class="v">CHA</div></div></div>
+    <div><h3>Cantrips</h3><p>${sh.cantrips.join(' · ')}</p></div>
+    ${Object.entries(sh.slots).map(([lv,n])=>`<div><h3>Level ${lv}</h3><div class="pips" style="margin-bottom:8px">${Array.from({length:n},(_,i)=>`<button class="pip ${i<S.used[lv]?'used':''}" data-act="slot" data-lv="${lv}" data-i="${i}" aria-label="Level ${lv} slot ${i+1}"></button>`).join('')}</div><p>${sh.spells[lv].join(' · ')}</p></div>`).join('')}`;
+  }else{
+    body=`<div class="chips"><span class="chip brass">${sh.purse.gp} gp</span><span class="chip">${sh.purse.sp} sp</span><span class="chip">${sh.purse.cp} cp</span></div>
+    <ul class="list">${sh.gear.map(([n,d])=>`<li style="flex-direction:column;align-items:flex-start;gap:2px"><b style="font-weight:500">${n}</b><span class="small">${d}</span></li>`).join('')}</ul>`;
+  }
+  return`<div><div class="eyebrow">Your character</div><h2>Ysolde Fen</h2><div class="sub">Half-elf Bard 5 · College of Lore</div></div>
+  <div class="subtabs" role="tablist">${tabs.map(([k,l])=>`<button class="${k===t?'on':''}" data-act="stab" data-id="${k}" role="tab" aria-selected="${k===t}">${l}</button>`).join('')}</div>
+  ${body}<button class="btn" data-act="rest">Long rest</button>`;
+}};
+
+V.quests={stage(){
+  const f=S.qFilter,qs=QUESTS.filter(q=>f==='all'||q.status===f);
+  return`<div class="stage-tag">Quest board · Drowned Lantern</div><div class="board">
+  <div class="qfilter">${[['all','All'],['active','Active'],['rumour','Rumours'],['completed','Completed']].map(([k,l])=>`<button class="${k===f?'on':''}" data-act="qf" data-id="${k}">${l}</button>`).join('')}</div>
+  <div class="notes">${qs.map(q=>`<button class="note ${q.status} ${q.id===S.quest?'on':''}" style="--r:${q.r}" data-act="quest" data-id="${q.id}"><h4>${q.title}</h4><p>${q.hook}</p><span class="stamp ${q.status}">${q.status}</span></button>`).join('')}</div></div>`;
+},rail(){
+  const q=QUESTS.find(x=>x.id===S.quest),done=S.checks[q.id]||[],sc={active:'warn',rumour:'verd',completed:'good'}[q.status];
+  return`<div><div class="eyebrow">Quest</div><h2>${q.title}</h2><div class="chips" style="margin-top:8px"><span class="chip ${sc}">${q.status}</span><span class="chip">${done.length} / ${q.obj.length} done</span></div></div>
+  <p>${q.text}</p>
+  <ul class="list"><li>Given by<span class="r" style="color:var(--fg);white-space:normal;text-align:right">${q.giver}</span></li><li>Where<button class="link" data-act="gotoloc" data-id="${q.loc}">${LOCS[q.loc].name}</button></li><li>Reward<span class="r" style="white-space:normal;text-align:right">${q.reward}</span></li></ul>
+  <div><h3>Objectives</h3>${q.obj.map((o,i)=>`<label class="check ${done.includes(i)?'done':''}"><input type="checkbox" id="ob-${q.id}-${i}" data-act="obj" data-q="${q.id}" data-i="${i}" ${done.includes(i)?'checked':''}><span>${o}</span></label>`).join('')}</div>
+  <p class="small">Your ticks are saved on this device only.</p>`;
+}};
+
+V.locations={stage(){return`<div class="stage-tag">World map · Gullwater Coast</div>${worldSVG()}${mapCtl}
+  <div class="legend"><span><i style="background:#cfa955"></i>Visited</span><span><i style="background:#5fa59a"></i>Known</span><span><i style="background:#95a0aa"></i>Rumoured</span></div>`},
+ mount(){PZ=panZoom($('#worldmap'),1000,700);markPins()},
+ rail(){
+  const l=LOCS[S.loc],qs=QUESTS.filter(q=>q.loc===S.loc),sc={visited:'brass',known:'verd',rumoured:''}[l.status];
+  return`<div><div class="eyebrow">${l.type}</div><h2>${l.name}</h2><div class="chips" style="margin-top:8px"><span class="chip ${sc}">${l.status}</span></div></div>
+  <p>${l.desc}</p>
+  <div><h3>Notes</h3><ul class="list">${l.facts.map(f=>`<li>${f}</li>`).join('')}</ul></div>
+  ${qs.length?`<div><h3>Quests here</h3><ul class="list">${qs.map(q=>`<li><button class="link" data-act="gotoquest" data-id="${q.id}">${q.title}</button><span class="chip">${q.status}</span></li>`).join('')}</ul></div>`:''}
+  ${S.loc==='saltmere'?`<button class="btn" data-act="goto" data-view="services">See services in Saltmere</button>`:''}
+  <p class="small">Drag to pan, scroll or use the buttons to zoom. Tap a marker for details.</p>`;
+}};
+
+V.services={stage(){return`<div class="stage-tag">Town map · Saltmere</div>${townSVG()}${mapCtl}`},
+ mount(){PZ=panZoom($('#townmap'),900,600);markPins()},
+ rail(){
+  const s=SERVICES[S.svc],shut=s.open==='Suspended';
+  return`<div><div class="eyebrow">${s.kind}</div><h2>${s.name}</h2><div class="sub">Run by ${s.who}</div><div class="chips" style="margin-top:8px"><span class="chip ${shut?'crit':'good'}">${s.open}</span></div></div>
+  <div><h3>Price list</h3><ul class="list">${s.list.map(([n,p])=>`<li>${n}<span class="r">${p}</span></li>`).join('')}</ul></div>
+  ${s.note?`<p class="small">${s.note}</p>`:''}
+  <div><h3>All services</h3><ul class="list">${Object.entries(SERVICES).map(([id,x])=>`<li><button class="link" data-act="svc" data-id="${id}" ${id===S.svc?'style="color:var(--brass)"':''}>${x.name}</button><span class="small">${x.kind}</span></li>`).join('')}</ul></div>`;
+}};
+
+V.merchants={stage(){
+  const m=MERCH[S.merch];
+  return`<div class="stage-tag">Merchants · Market Row</div><div class="shop">
+  <div class="mtabs">${Object.entries(MERCH).map(([id,x])=>`<button class="${id===S.merch?'on':''}" data-act="merch" data-id="${id}"><span class="mav" style="background:${x.c}">${x.who[0]}</span><span><b>${x.name}</b><small>${x.who} · ${x.mood}</small></span></button>`).join('')}</div>
+  <div class="shelf">${m.items.map(([n,k,r,p],i)=>`<button class="item ${i===S.item?'on':''}" data-act="item" data-i="${i}">${icon(k,m.c)}<b>${n}</b><span class="small r-${r}">${r}</span><span class="pr">${fmtPrice(p)}</span></button>`).join('')}</div></div>`;
+},rail(){
+  const m=MERCH[S.merch],[n,k,r,p,w,d]=m.items[S.item],key=S.merch+':'+S.item,asked=S.req[key],pu=SHEET.purse;
+  const afford=pu.gp+pu.sp/10+pu.cp/100>=p;
+  return`<div><div class="eyebrow">${m.name}</div><h2>${n}</h2><div class="chips" style="margin-top:8px"><span class="chip r-${r}">${r}</span><span class="chip">${k}</span></div></div>
+  <p>${d}</p>
+  <div class="stats"><div class="stat"><div class="k">Price</div><div class="v" style="color:var(--brass)">${fmtPrice(p)}</div></div><div class="stat"><div class="k">Weight</div><div class="v">${w}</div></div><div class="stat"><div class="k">Purse</div><div class="v">${pu.gp} gp</div></div></div>
+  ${afford?'':'<p class="small" style="color:var(--warn)">You can\'t afford this yet. Pool coin with the party or haggle.</p>'}
+  <div class="btnrow"><button class="btn primary" data-act="req" ${asked?'disabled':''}>${asked?'Requested':'Ask DM to buy'}</button>${asked?'<button class="btn" data-act="unreq">Cancel request</button>':''}</div>
+  <div><h3>About the merchant</h3><p>${m.who}, ${m.race.toLowerCase()}. Mood: ${m.mood.toLowerCase()}.</p></div>
+  <p class="small">Mock-up: requests are stored on this device and don't reach the DM yet.</p>`;
+}};
+
+/* ---------- combat ---------- */
+const MAP=["################","#......#.......#","#......#..~~...#","#..............#","#......#...O...#","###.####.......#","#..............#","#....~~........#","#....~~...#....#","#.........#....#","#..............#","################"];
+const COLS=16,ROWS=12,CS=40;
+const C={round:2,turn:0,sel:'ysolde',moveLeft:30,dashed:false,hover:null,
+ tokens:[
+  {id:'kett',name:'Kett',x:3,y:9,init:19,hp:22,max:33,ac:15,speed:30,pc:true,c:'#5fa59a',cond:['Hidden']},
+  {id:'captain',name:'Bandit Captain',x:12,y:2,init:16,hp:65,max:65,ac:15,speed:30,c:'#a8443f',cond:[]},
+  {id:'ysolde',name:'Ysolde Fen',x:2,y:8,init:14,hp:31,max:38,ac:14,speed:30,pc:true,you:true,c:'#b07acf',cond:[]},
+  {id:'wolf',name:'Wolf',x:9,y:3,init:13,hp:6,max:11,ac:13,speed:40,c:'#8a6a4a',cond:['Prone']},
+  {id:'brannoc',name:'Brannoc Ashvale',x:4,y:7,init:11,hp:44,max:49,ac:18,speed:30,pc:true,c:'#c9714f',cond:[]},
+  {id:'b1',name:'Bandit',x:12,y:4,init:9,hp:4,max:11,ac:12,speed:30,c:'#a8443f',cond:['Frightened']},
+  {id:'b2',name:'Bandit',x:13,y:6,init:9,hp:11,max:11,ac:12,speed:30,c:'#a8443f',cond:[]},
+  {id:'oriel',name:'Oriel Thorne',x:2,y:6,init:6,hp:40,max:43,ac:18,speed:25,pc:true,c:'#d8b65a',cond:[]},
+ ]};
+C.turn=C.tokens.findIndex(t=>t.id==='ysolde');
+const tok=id=>C.tokens.find(t=>t.id===id), active=()=>C.tokens[C.turn];
+const wall=(x,y)=>{const c=MAP[y]?.[x];return!c||c==='#'||c==='O'};
+const enemyState=t=>t.hp<=0?['Down','crit']:t.hp===t.max?['Unhurt','good']:t.hp>t.max/2?['Wounded','warn']:['Bloodied','crit'];
+function reach(t){
+  const dist={},prev={},k=(x,y)=>x+','+y,occ=new Set(C.tokens.filter(o=>o!==t&&o.hp>0).map(o=>k(o.x,o.y)));
+  dist[k(t.x,t.y)]=0;const q=[[0,t.x,t.y]];
+  while(q.length){q.sort((a,b)=>a[0]-b[0]);const[d,x,y]=q.shift();if(d>dist[k(x,y)])continue;
+    for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;
+      if(wall(nx,ny)||occ.has(k(nx,ny)))continue;if(dx&&dy&&(wall(x+dx,y)||wall(x,y+dy)))continue;
+      const nd=d+(MAP[ny][nx]==='~'?10:5);if(nd>C.moveLeft)continue;
+      if(dist[k(nx,ny)]===undefined||nd<dist[k(nx,ny)]){dist[k(nx,ny)]=nd;prev[k(nx,ny)]=k(x,y);q.push([nd,nx,ny])}}}
+  return{dist,prev};
+}
+let RCH=null;
+function combatSVG(){
+  const a=active(),showReach=C.sel===a.id&&a.hp>0;RCH=showReach?reach(a):null;
+  let floor='';for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const c=MAP[y][x];
+    if(c==='#')floor+=`<rect x="${x*CS}" y="${y*CS}" width="${CS}" height="${CS}" fill="#232a33"/>`;
+    else if(c==='O')floor+=`<rect x="${x*CS}" y="${y*CS}" width="${CS}" height="${CS}" fill="#3b4048"/><circle cx="${x*CS+20}" cy="${y*CS+20}" r="15" fill="#59606a" stroke="#22272e" stroke-width="3"/>`;
+    else floor+=`<rect x="${x*CS}" y="${y*CS}" width="${CS}" height="${CS}" fill="${(x+y)%2?'#4a4237':'#463e34'}"/>${c==='~'?`<g fill="#6b6255"><circle cx="${x*CS+11}" cy="${y*CS+14}" r="4"/><circle cx="${x*CS+26}" cy="${y*CS+24}" r="5"/><circle cx="${x*CS+16}" cy="${y*CS+31}" r="3"/></g>`:''}`}
+  let reachL='';if(RCH)for(const key in RCH.dist){if(!RCH.dist[key])continue;const[x,y]=key.split(',').map(Number);reachL+=`<rect x="${x*CS+1}" y="${y*CS+1}" width="${CS-2}" height="${CS-2}" fill="#cfa955" opacity=".16"/>`}
+  const toks=C.tokens.map(t=>{const isA=t===a,isS=t.id===C.sel,cx=t.x*CS+20,cy=t.y*CS+20;
+    return`<g opacity="${t.hp>0?1:.35}">${isA?`<circle cx="${cx}" cy="${cy}" r="19" fill="none" stroke="#cfa955" stroke-width="3"/>`:''}
+    ${isS&&!isA?`<circle cx="${cx}" cy="${cy}" r="19" fill="none" stroke="#e7e2d7" stroke-width="2" stroke-dasharray="4 3"/>`:''}
+    <circle cx="${cx}" cy="${cy}" r="15" fill="${t.c}" stroke="${t.pc?'#0b0f14':'#2a0d0b'}" stroke-width="2.5"/>
+    <text x="${cx}" y="${cy+5}" text-anchor="middle" font-family="Pirata One, Georgia, serif" font-size="16" fill="#0b0f14">${t.name[0]}${t.id==='b1'?'1':t.id==='b2'?'2':''}</text>
+    ${t.cond.includes('Prone')?`<text x="${cx+12}" y="${cy-10}" font-size="11" fill="#e3b04b" font-family="IBM Plex Mono, monospace">P</text>`:''}</g>`}).join('');
+  let grid='';for(let x=0;x<=COLS;x++)grid+=`M${x*CS} 0V${ROWS*CS}`;for(let y=0;y<=ROWS;y++)grid+=`M0 ${y*CS}H${COLS*CS}`;
+  return`<rect width="${COLS*CS}" height="${ROWS*CS}" fill="#0b0f14"/>${floor}<path d="${grid}" stroke="#0b0f14" stroke-opacity=".45" stroke-width="1"/>${reachL}<g id="pathL"></g>${toks}`;
+}
+function drawPath(){
+  const g=$('#pathL');if(!g)return;g.innerHTML='';const h=C.hover;if(!RCH||!h)return;const key=h.join(',');if(RCH.dist[key]===undefined||!RCH.dist[key])return;
+  const pts=[];let cur=key;while(cur){const[x,y]=cur.split(',').map(Number);pts.unshift(`${x*CS+20},${y*CS+20}`);cur=RCH.prev[cur]}
+  const[hx,hy]=h;g.innerHTML=`<polyline points="${pts.join(' ')}" fill="none" stroke="#cfa955" stroke-width="3" stroke-dasharray="6 5" stroke-linecap="round"/>
+  <rect x="${hx*CS+2}" y="${hy*CS+2}" width="${CS-4}" height="${CS-4}" fill="none" stroke="#cfa955" stroke-width="2"/>
+  <g transform="translate(${hx*CS+20} ${hy*CS-6})"><rect x="-24" y="-12" width="48" height="18" rx="4" fill="#0b0f14" opacity=".9"/><text text-anchor="middle" y="2" font-size="12" fill="#cfa955" font-family="IBM Plex Mono, monospace">${RCH.dist[key]} ft</text></g>`;
+}
+V.combat={stage(){return`<div class="stage-tag">Combat · Smugglers' cellar</div><svg class="combat-svg" id="cmap" viewBox="0 0 ${COLS*CS} ${ROWS*CS}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Combat grid, 5 foot squares">${combatSVG()}</svg>
+  <div class="legend"><span><i style="background:#cfa955;opacity:.6"></i>Can reach</span><span><i style="background:#6b6255"></i>Difficult terrain</span><span>1 square = 5 ft</span></div>`},
+ mount(){
+  const svg=$('#cmap');
+  const cellOf=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());return[Math.floor(q.x/CS),Math.floor(q.y/CS)]};
+  svg.addEventListener('pointermove',e=>{const c=cellOf(e);if(!C.hover||c[0]!==C.hover[0]||c[1]!==C.hover[1]){C.hover=c;drawPath()}});
+  svg.addEventListener('pointerleave',()=>{C.hover=null;drawPath()});
+  svg.addEventListener('click',e=>{const[x,y]=cellOf(e),t=C.tokens.find(o=>o.x===x&&o.y===y);
+    if(t){C.sel=t.id;return refreshCombat()}
+    const key=x+','+y;if(RCH&&RCH.dist[key]){const a=active();C.moveLeft-=RCH.dist[key];a.x=x;a.y=y;if(a.cond.includes('Hidden'))a.cond=a.cond.filter(c=>c!=='Hidden');refreshCombat()}});
+ },
+ rail(){
+  const a=active(),s=tok(C.sel),you=a.you,maxMove=a.speed*(C.dashed?2:1);
+  const info=s.pc?`<div class="hpline"><span>Hit points</span><span>${s.hp} / ${s.max}</span></div><div class="bar"><i style="width:${pct(s.hp,s.max)}%;background:${hpColor(pct(s.hp,s.max))}"></i></div>`
+    :(()=>{const[l,c]=enemyState(s);return`<div class="chips"><span class="chip ${c}">${l}</span></div><p class="small" style="margin-top:6px">Exact enemy hit points are hidden from players.</p>`})();
+  return`<div><div class="eyebrow">Round ${C.round}</div><h2>${you?'Your turn':a.name+'\'s turn'}</h2></div>
+  <div class="turnbanner ${you?'you':''}">
+    <div class="hpline"><span>Movement left</span><span>${C.moveLeft} / ${maxMove} ft</span></div>
+    <div class="bar"><i style="width:${pct(C.moveLeft,maxMove)}%;background:var(--brass)"></i></div>
+    <div class="small">${C.sel===a.id?'Tap a highlighted square to move. Diagonals cost 5 ft, rubble costs double.':'Select '+a.name+' to see where they can move.'}</div>
+    <div class="btnrow"><button class="btn" data-act="dash" ${C.dashed?'disabled':''}>Dash</button><button class="btn primary" data-act="endturn">End turn</button></div>
+  </div>
+  <div><h3>Initiative</h3><ul class="init">${C.tokens.map((t,i)=>`<li><button class="${i===C.turn?'cur':''} ${t.id===C.sel?'sel':''} ${t.hp<=0?'down':''}" data-act="csel" data-id="${t.id}"><span class="iv">${t.init}</span><span class="tk" style="background:${t.c}"></span><span class="nm">${t.name}${t.id==='b1'?' 1':t.id==='b2'?' 2':''}${t.you?' (you)':''}</span>${t.pc?`<span class="small">${t.hp}/${t.max}</span>`:`<span class="chip ${enemyState(t)[1]}">${enemyState(t)[0]}</span>`}</button></li>`).join('')}</ul></div>
+  <div><h3>Selected · ${s.name}</h3>${info}
+   <div class="stats" style="margin-top:10px"><div class="stat"><div class="k">AC</div><div class="v">${s.pc?s.ac:'?'}</div></div><div class="stat"><div class="k">Speed</div><div class="v">${s.speed} ft</div></div><div class="stat"><div class="k">Init</div><div class="v">${s.init}</div></div></div>
+   <div class="chips" style="margin-top:10px">${s.cond.length?s.cond.map(c=>`<span class="chip warn">${c}</span>`).join(''):'<span class="chip">No conditions</span>'}</div></div>
+  <p class="small">Mock-up: any active token can move so you can try the grid. Later the DM would control enemy turns.</p>`;
+ }};
+function refreshCombat(){const svg=$('#cmap');if(svg){svg.innerHTML=combatSVG();drawPath()}$('#rail').innerHTML=V.combat.rail()}
+
+/* ---------- render & routing ---------- */
+function markPins(){const id=S.view==='locations'?S.loc:S.svc;document.querySelectorAll('.pin').forEach(p=>p.classList.toggle('on',p.dataset.pin===id))}
+function render(){
+  document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('on',a.dataset.view===S.view));
+  const v=V[S.view];$('#stage').innerHTML=v.stage();$('#rail').innerHTML=v.rail();PZ=null;v.mount&&v.mount();
+}
+const renderRail=()=>{$('#rail').innerHTML=V[S.view].rail()};
+function route(){const h=location.hash.slice(1);S.view=V[h]?h:'party';render()}
+window.addEventListener('hashchange',route);
+
+document.addEventListener('click',e=>{
+  const pin=e.target.closest('.pin');
+  if(pin){if(S.view==='locations')S.loc=pin.dataset.pin;else S.svc=pin.dataset.pin;markPins();renderRail();return}
+  const el=e.target.closest('[data-act]');if(!el)return;const d=el.dataset,act=d.act;
+  switch(act){
+    case'party':S.party=d.id;render();break;
+    case'goto':location.hash='#'+d.view;break;
+    case'stab':S.sheetTab=d.id;renderRail();break;
+    case'hp':S.hp=Math.max(0,Math.min(PARTY[0].max,S.hp+ +d.d));store.set('hp',S.hp);C.tokens.find(t=>t.id==='ysolde').hp=S.hp;render();break;
+    case'insp':S.insp=Math.max(0,Math.min(4,S.insp+ +d.d));store.set('insp',S.insp);render();break;
+    case'slot':{const lv=d.lv,i=+d.i;S.used[lv]=i<S.used[lv]?i:i+1;store.set('used',S.used);renderRail();break}
+    case'rest':S.hp=PARTY[0].max;S.used={1:0,2:0,3:0};S.insp=4;store.set('hp',S.hp);store.set('used',S.used);store.set('insp',4);C.tokens.find(t=>t.id==='ysolde').hp=S.hp;render();break;
+    case'qf':S.qFilter=d.id;render();break;
+    case'quest':S.quest=d.id;$('#stage').querySelectorAll('.note').forEach(n=>n.classList.toggle('on',n.dataset.id===d.id));renderRail();break;
+    case'gotoloc':S.loc=d.id;location.hash='#locations';break;
+    case'gotoquest':S.quest=d.id;S.qFilter='all';location.hash='#quests';break;
+    case'svc':S.svc=d.id;markPins();renderRail();break;
+    case'merch':S.merch=d.id;S.item=0;render();break;
+    case'item':S.item=+d.i;$('#stage').querySelectorAll('.item').forEach((n,i)=>n.classList.toggle('on',i===S.item));renderRail();break;
+    case'req':S.req[S.merch+':'+S.item]=1;store.set('req',S.req);renderRail();break;
+    case'unreq':delete S.req[S.merch+':'+S.item];store.set('req',S.req);renderRail();break;
+    case'zin':PZ&&PZ.zoom(1/1.3);break;case'zout':PZ&&PZ.zoom(1.3);break;case'zreset':PZ&&PZ.reset();break;
+    case'csel':C.sel=d.id;refreshCombat();break;
+    case'dash':if(!C.dashed){C.dashed=true;C.moveLeft+=active().speed;refreshCombat()}break;
+    case'endturn':{let n=C.turn;do{n=(n+1)%C.tokens.length;if(n===0)C.round++}while(C.tokens[n].hp<=0&&n!==C.turn);
+      C.turn=n;C.sel=active().id;C.moveLeft=active().speed;C.dashed=false;refreshCombat();break}
+  }
+});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset.act!=='obj')return;
+  const q=el.dataset.q,i=+el.dataset.i,arr=S.checks[q]||[];S.checks[q]=el.checked?[...new Set([...arr,i])]:arr.filter(x=>x!==i);store.set('checks',S.checks);renderRail()});
+
+C.tokens.find(t=>t.id==='ysolde').hp=S.hp;
+route();
+</script>
+
+</body></html>
